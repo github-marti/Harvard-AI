@@ -1,3 +1,5 @@
+import time
+
 # move class
 class Move():
     def __init__(self, r, c):
@@ -15,7 +17,7 @@ class Board():
         r1 = " ".join(self.layout[0])
         r2 = " ".join(self.layout[1])
         r3 = " ".join(self.layout[2])
-        return "{}\n{}\n{}".format(r1, r2, r3)
+        return "------\n{}\n{}\n{}\n------".format(r1, r2, r3)
     
     def make_move(self, m, p):
         r = m.r
@@ -55,6 +57,7 @@ class Board():
                     return 1
                 elif r[0] == "O":
                     return -1
+
         # check if any completed columns
         for i in range(len(self.layout)):
             if self.layout[0][i] == self.layout[1][i] and self.layout[1][i] == self.layout[2][i]:
@@ -83,7 +86,10 @@ class Board():
 
 # minimax function
 def minimax(b, d, p):
-    if not b.moves_left or d == 0:
+    print(b)
+    time.sleep(2)
+    print(b.evaluate())
+    if (not b.moves_left) or (d == 0):
         return b.evaluate()
 
     if p == "X":
@@ -91,27 +97,24 @@ def minimax(b, d, p):
         for move in b.get_moves():
             b.make_move(move, p)
             v = max(v, minimax(b, d-1, "O"))
-            print("v: {}".format(v))
             b.undo_move(move)
-            return v
     elif p == "O":
         v = float("inf")
         for move in b.get_moves():
             b.make_move(move, p)
             v = min(v, minimax(b, d-1, "X"))
-            print("v: {}".format(v))
             b.undo_move(move)
-            return v
+    return v
 
 
 def get_best_move(b, p):
-    best_move = Move(r=1, c=1)
+    best_move = Move(r=-1, c=-1)
     if p == "X":
         best_v = float("-inf")
         for move in b.get_moves():
             b.make_move(move, p)
             v = max(best_v, minimax(b, 9, "O"))
-            print("v: {}".format(v))
+            print("mm: {}".format(minimax(b, 9, "X")))
             b.undo_move(move)
             if (v > best_v):
                 print('updating best move with: {}, {}'.format(move.r, move.c))
@@ -123,9 +126,10 @@ def get_best_move(b, p):
         for move in b.get_moves():
             b.make_move(move, p)
             v = min(best_v, minimax(b, 9, "X"))
-            print("v: {}".format(v))
+            print("mm: {}".format(minimax(b, 9, "X")))
             b.undo_move(move)
             if (v < best_v):
+                print('updating best move with: {}, {}'.format(move.r, move.c))
                 best_move.r = move.r
                 best_move.c = move.c
                 best_v = v
@@ -140,8 +144,8 @@ while b.moves_left() and not b.complete:
     move = get_best_move(b, p)
     b.make_move(move, p)
     print(b)
-    opponent = True if not opponent else False
+    opponent = not opponent
     if b.evaluate() != 0:
         b.end_game()
-
+    time.sleep(3)
         
