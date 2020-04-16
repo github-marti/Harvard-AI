@@ -6,6 +6,9 @@ class Move():
         self.r = r
         self.c = c
 
+    def __str__(self):
+        return "({} {})".format(self.r, self.c)
+
 
 # board class
 class Board():
@@ -47,62 +50,58 @@ class Board():
     def end_game(self):
         self.complete = True
 
+# evaluate function to tell final score
+def evaluate(b):
+    # check if any completed rows
+    for r in b.layout:
+        if r[0] == r[1] and r[1] == r[2]:
+            if r[0] == "X":
+                return 1
+            elif r[0] == "O":
+                return -1
+
+    # check if any completed columns
+    for i in range(len(b.layout)):
+        if b.layout[0][i] == b.layout[1][i] and b.layout[1][i] == b.layout[2][i]:
+            if b.layout[0][i] == "X":
+                return 1
+            elif b.layout[0][i] == "O":
+                return -1
     
-    # evaluate function to tell final score
-    def evaluate(self):
-        # check if any completed rows
-        for r in self.layout:
-            if r[0] == r[1] and r[1] == r[2]:
-                if r[0] == "X":
-                    return 1
-                elif r[0] == "O":
-                    return -1
+    # checking for diagonals
+    if b.layout[0][0] == b.layout[1][1] and b.layout[1][1] == b.layout[2][2]:
+        if b.layout[0][0] == "X":
+            return 1
+        elif b.layout[0][0] == "O":
+            return -1
 
-        # check if any completed columns
-        for i in range(len(self.layout)):
-            if self.layout[0][i] == self.layout[1][i] and self.layout[1][i] == self.layout[2][i]:
-                if self.layout[0][i] == "X":
-                    return 1
-                elif self.layout[0][i] == "O":
-                    return -1
-        
-        # checking for diagonals
-        if self.layout[0][0] == self.layout[1][1] and self.layout[1][1] == self.layout[2][2]:
-            if self.layout[0][0] == "X":
-                return 1
-            elif self.layout[0][0] == "O":
-                return -1
-
-        if self.layout[0][2] == self.layout[1][1] and self.layout[1][1] == self.layout[2][0]:
-            if self.layout[0][2] == "X":
-                return 1
-            elif self.layout[0][2] == "O":
-                return -1
-        
-        # else return 0 for tie
-        return 0
+    if b.layout[0][2] == b.layout[1][1] and b.layout[1][1] == b.layout[2][0]:
+        if b.layout[0][2] == "X":
+            return 1
+        elif b.layout[0][2] == "O":
+            return -1
+    
+    # else return 0 for tie
+    return 0
 
 
 
 # minimax function
-def minimax(b, d, p):
-    print(b)
-    time.sleep(2)
-    print(b.evaluate())
-    if (not b.moves_left) or (d == 0):
-        return b.evaluate()
+def minimax(b, p):
+    if not b.moves_left():
+        return evaluate(b)
 
     if p == "X":
         v = float("-inf")
         for move in b.get_moves():
             b.make_move(move, p)
-            v = max(v, minimax(b, d-1, "O"))
+            v = max(v, minimax(b, "O"))
             b.undo_move(move)
     elif p == "O":
         v = float("inf")
         for move in b.get_moves():
             b.make_move(move, p)
-            v = min(v, minimax(b, d-1, "X"))
+            v = min(v, minimax(b, "X"))
             b.undo_move(move)
     return v
 
@@ -113,8 +112,7 @@ def get_best_move(b, p):
         best_v = float("-inf")
         for move in b.get_moves():
             b.make_move(move, p)
-            v = max(best_v, minimax(b, 9, "O"))
-            print("mm: {}".format(minimax(b, 9, "X")))
+            v = max(best_v, minimax(b, "O"))
             b.undo_move(move)
             if (v > best_v):
                 print('updating best move with: {}, {}'.format(move.r, move.c))
@@ -125,8 +123,7 @@ def get_best_move(b, p):
         best_v = float("inf")
         for move in b.get_moves():
             b.make_move(move, p)
-            v = min(best_v, minimax(b, 9, "X"))
-            print("mm: {}".format(minimax(b, 9, "X")))
+            v = min(best_v, minimax(b, "X"))
             b.undo_move(move)
             if (v < best_v):
                 print('updating best move with: {}, {}'.format(move.r, move.c))
@@ -145,7 +142,7 @@ while b.moves_left() and not b.complete:
     b.make_move(move, p)
     print(b)
     opponent = not opponent
-    if b.evaluate() != 0:
+    if evaluate(b) != 0:
         b.end_game()
     time.sleep(3)
         
