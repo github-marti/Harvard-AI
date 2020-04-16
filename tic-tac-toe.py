@@ -14,7 +14,7 @@ class Move():
 class Board():
     def __init__(self):
         self.layout = [['_', '_', '_'], ['_', '_', '_'], ['_', '_', '_']]
-        self.complete = False
+        self._complete = False
 
     def __str__(self):
         r1 = " ".join(self.layout[0])
@@ -48,7 +48,10 @@ class Board():
         return moves
 
     def end_game(self):
-        self.complete = True
+        self._complete = True
+
+    def is_complete(self):
+        return self._complete
 
 # evaluate function to tell final score
 def evaluate(b):
@@ -115,7 +118,6 @@ def get_best_move(b, p):
             v = max(best_v, minimax(b, "O"))
             b.undo_move(move)
             if (v > best_v):
-                print('updating best move with: {}, {}'.format(move.r, move.c))
                 best_move.r = move.r
                 best_move.c = move.c
                 best_v = v
@@ -126,7 +128,6 @@ def get_best_move(b, p):
             v = min(best_v, minimax(b, "X"))
             b.undo_move(move)
             if (v < best_v):
-                print('updating best move with: {}, {}'.format(move.r, move.c))
                 best_move.r = move.r
                 best_move.c = move.c
                 best_v = v
@@ -136,7 +137,7 @@ def get_best_move(b, p):
 b = Board()
 opponent = False
 
-while b.moves_left() and not b.complete:
+while b.moves_left() and not b.is_complete():
     p = "X" if not opponent else "O"
     move = get_best_move(b, p)
     b.make_move(move, p)
@@ -144,5 +145,5 @@ while b.moves_left() and not b.complete:
     opponent = not opponent
     if evaluate(b) != 0:
         b.end_game()
-    time.sleep(3)
+    time.sleep(1)
         
